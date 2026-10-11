@@ -18,17 +18,17 @@
   body{padding-top:env(safe-area-inset-top);box-sizing:border-box}
   #app{position:absolute;left:0;right:0;bottom:0;top:env(safe-area-inset-top);width:100%;height:calc(100% - env(safe-area-inset-top));border:0;display:block;background:#F3F1EC}
   #bar{position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top);background:#15171C}
-  #splash{position:fixed;inset:0;background:#15171C;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;transition:opacity .25s;z-index:5}
+  #splash{position:fixed;inset:0;background:#fff;color:#1D3A4F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;transition:opacity .25s;z-index:5}
   #splash img{width:88px;height:88px;border-radius:20px}
   #splash b{font-size:20px;letter-spacing:-.01em}
-  #splash span{font-size:14px;color:#A9ADB8}
+  #splash span{font-size:14px;color:#5B606B}
   #splash.off{opacity:0;pointer-events:none}
   #net{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#15171C;color:#fff;border-radius:999px;padding:10px 18px;font:600 14px -apple-system,"Apple SD Gothic Neo",sans-serif;display:none;z-index:6}
 </style>
 </head>
 <body>
 <div id="bar"></div>
-<div id="splash"><img src="icon-192.png" alt=""><b>레스큐라이프 일정</b><span>불러오는 중…</span></div>
+<div id="splash"><img src="logo-full.png" alt="RESCUE LIFE" style="width:min(70vw,300px);height:auto;border-radius:0"><span>불러오는 중…</span></div>
 <iframe id="app" title="레스큐라이프 일정" allow="clipboard-write"></iframe>
 <div id="net">인터넷 연결을 확인해 주세요</div>
 <script>
