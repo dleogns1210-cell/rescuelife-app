@@ -33,7 +33,7 @@
 <div id="net">인터넷 연결을 확인해 주세요</div>
 <script>
 var EXEC='https://script.google.com/macros/s/AKfycbxCM8O-ochC4oDsjYsJiq6Iz5DoSbv7RZr3YgnMvynsNaUdoKDexgvq93R-Mq6jPwWz/exec';
-var VIEWS={'':'', cal:'?view=cal', stats:'?view=stats', notice:'?view=notice', contact:'?view=contact'};
+var VIEWS={'':'', cal:'?view=cal', stats:'?view=stats', notice:'?view=notice', contact:'?view=contact', trans:'?view=trans'};
 var f=document.getElementById('app'), sp=document.getElementById('splash');
 function viewOf(){var h=(location.hash||'').replace('#','');return VIEWS.hasOwnProperty(h)?h:'';}
 function open(v){sp.classList.remove('off');f.src=EXEC+VIEWS[v];}
@@ -41,7 +41,7 @@ f.addEventListener('load',function(){setTimeout(function(){sp.classList.add('off
 setTimeout(function(){sp.classList.add('off');},12000);
 window.addEventListener('message',function(e){
   var d=e.data;if(!d||d.rl!=='go'||typeof d.url!=='string'||d.url.indexOf(EXEC)!==0)return;
-  var m=d.url.match(/view=(cal|stats|notice|contact)/), v=m?m[1]:'';
+  var m=d.url.match(/view=(cal|stats|notice|contact|trans)/), v=m?m[1]:'';
   if(v===viewOf()){open(v);return;}
   history.pushState(null,'',v?'#'+v:location.pathname);open(v);
 });
