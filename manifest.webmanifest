@@ -40,8 +40,8 @@
       ]
     },
     {
-      "name": "통계",
-      "url": "./#stats",
+      "name": "공지",
+      "url": "./#notice",
       "icons": [
         {
           "src": "icon-192.png",
@@ -50,8 +50,8 @@
       ]
     },
     {
-      "name": "공지",
-      "url": "./#notice",
+      "name": "병원 연락처",
+      "url": "./#contact",
       "icons": [
         {
           "src": "icon-192.png",
