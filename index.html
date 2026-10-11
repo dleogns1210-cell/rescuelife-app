@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>레스큐라이프</title>
+<meta name="description" content="레스큐라이프 행사대기 근무 일정">
+<meta name="theme-color" content="#15171C">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="레스큐라이프">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<style>
+  html,body{margin:0;height:100%;background:#F3F1EC;overflow:hidden}
+  body{padding-top:env(safe-area-inset-top);box-sizing:border-box}
+  #app{position:absolute;left:0;right:0;bottom:0;top:env(safe-area-inset-top);width:100%;height:calc(100% - env(safe-area-inset-top));border:0;display:block;background:#F3F1EC}
+  #bar{position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top);background:#15171C}
+  #splash{position:fixed;inset:0;background:#15171C;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;transition:opacity .25s;z-index:5}
+  #splash img{width:88px;height:88px;border-radius:20px}
+  #splash b{font-size:20px;letter-spacing:-.01em}
+  #splash span{font-size:14px;color:#A9ADB8}
+  #splash.off{opacity:0;pointer-events:none}
+  #net{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#15171C;color:#fff;border-radius:999px;padding:10px 18px;font:600 14px -apple-system,"Apple SD Gothic Neo",sans-serif;display:none;z-index:6}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="splash"><img src="icon-192.png" alt=""><b>레스큐라이프 일정</b><span>불러오는 중…</span></div>
+<iframe id="app" title="레스큐라이프 일정" allow="clipboard-write"></iframe>
+<div id="net">인터넷 연결을 확인해 주세요</div>
+<script>
+var EXEC='https://script.google.com/macros/s/AKfycbxCM8O-ochC4oDsjYsJiq6Iz5DoSbv7RZr3YgnMvynsNaUdoKDexgvq93R-Mq6jPwWz/exec';
+var VIEWS={'':'', cal:'?view=cal', stats:'?view=stats'};
+var f=document.getElementById('app'), sp=document.getElementById('splash');
+function viewOf(){var h=(location.hash||'').replace('#','');return VIEWS.hasOwnProperty(h)?h:'';}
+function open(v){sp.classList.remove('off');f.src=EXEC+VIEWS[v];}
+f.addEventListener('load',function(){setTimeout(function(){sp.classList.add('off');},400);});
+setTimeout(function(){sp.classList.add('off');},12000);
+window.addEventListener('message',function(e){
+  var d=e.data;if(!d||d.rl!=='go'||typeof d.url!=='string'||d.url.indexOf(EXEC)!==0)return;
+  var m=d.url.match(/view=(cal|stats)/), v=m?m[1]:'';
+  if(v===viewOf()){open(v);return;}
+  history.pushState(null,'',v?'#'+v:location.pathname);open(v);
+});
+window.addEventListener('popstate',function(){open(viewOf());});
+function net(){document.getElementById('net').style.display=navigator.onLine?'none':'block';}
+window.addEventListener('online',function(){net();open(viewOf());});window.addEventListener('offline',net);net();
+open(viewOf());
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+</script>
+</body>
+</html>
