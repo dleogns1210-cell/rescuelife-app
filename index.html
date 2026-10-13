@@ -39,7 +39,7 @@ var EXEC='https://script.google.com/macros/s/AKfycbxCM8O-ochC4oDsjYsJiq6Iz5DoSbv
 var VIEWS={'':'', cal:'?view=cal', stats:'?view=stats', notice:'?view=notice', contact:'?view=contact', trans:'?view=trans', equip:'?view=equip'};
 /* 속도: 한 번 연 화면은 숨겨 두었다가 다시 보여 줌(탭 전환이 바로 됨).
    잠시(FRESH) 안 본 화면은 보여 줄 때 데이터만 새로 받게 알림. 자주 쓰는 탭은 미리 열어 둠. */
-var FRESH=20000, PRELOAD=['','cal','trans','equip'];
+var FRESH=20000, PRELOAD=['','cal','contact'];
 var box=document.getElementById('frames'), sp=document.getElementById('splash');
 var F={}, CUR=null;
 function viewOf(){var h=(location.hash||'').replace('#','');return VIEWS.hasOwnProperty(h)?h:'';}
