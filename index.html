@@ -9,6 +9,9 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com">
+<link rel="dns-prefetch" href="https://fonts.googleapis.com">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="레스큐라이프">
@@ -16,11 +19,11 @@
 <style>
   html,body{margin:0;height:100%;background:#F3F1EC;overflow:hidden}
   body{padding-top:env(safe-area-inset-top);box-sizing:border-box}
-  #app{position:absolute;left:0;right:0;bottom:0;top:env(safe-area-inset-top);width:100%;height:calc(100% - env(safe-area-inset-top));border:0;display:block;background:#F3F1EC}
+  #frames{position:absolute;left:0;right:0;bottom:0;top:env(safe-area-inset-top)}
+  #frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#F3F1EC;visibility:hidden;pointer-events:none}
+  #frames iframe.on{visibility:visible;pointer-events:auto;z-index:1}
   #bar{position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top);background:#15171C}
-  #splash{position:fixed;inset:0;background:#fff;color:#1D3A4F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;transition:opacity .25s;z-index:5}
-  #splash img{width:88px;height:88px;border-radius:20px}
-  #splash b{font-size:20px;letter-spacing:-.01em}
+  #splash{position:fixed;inset:0;background:#fff;color:#1D3A4F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;transition:opacity .2s;z-index:5}
   #splash span{font-size:14px;color:#5B606B}
   #splash.off{opacity:0;pointer-events:none}
   #net{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#15171C;color:#fff;border-radius:999px;padding:10px 18px;font:600 14px -apple-system,"Apple SD Gothic Neo",sans-serif;display:none;z-index:6}
@@ -28,27 +31,54 @@
 </head>
 <body>
 <div id="bar"></div>
-<div id="splash"><img src="logo-full.png" alt="RESCUE LIFE" style="width:min(70vw,300px);height:auto;border-radius:0"><span>불러오는 중…</span></div>
-<iframe id="app" title="레스큐라이프 일정" allow="clipboard-write"></iframe>
+<div id="frames"></div>
+<div id="splash"><img src="logo-full.png" alt="RESCUE LIFE" style="width:min(70vw,300px);height:auto"><span>불러오는 중…</span></div>
 <div id="net">인터넷 연결을 확인해 주세요</div>
 <script>
 var EXEC='https://script.google.com/macros/s/AKfycbxCM8O-ochC4oDsjYsJiq6Iz5DoSbv7RZr3YgnMvynsNaUdoKDexgvq93R-Mq6jPwWz/exec';
 var VIEWS={'':'', cal:'?view=cal', stats:'?view=stats', notice:'?view=notice', contact:'?view=contact', trans:'?view=trans', equip:'?view=equip'};
-var f=document.getElementById('app'), sp=document.getElementById('splash');
+/* 속도: 한 번 연 화면은 숨겨 두었다가 다시 보여 줌(탭 전환이 바로 됨).
+   잠시(FRESH) 안 본 화면은 보여 줄 때 데이터만 새로 받게 알림. 자주 쓰는 탭은 미리 열어 둠. */
+var FRESH=20000, PRELOAD=['','cal','trans','equip'];
+var box=document.getElementById('frames'), sp=document.getElementById('splash');
+var F={}, CUR=null;
 function viewOf(){var h=(location.hash||'').replace('#','');return VIEWS.hasOwnProperty(h)?h:'';}
-function open(v){sp.classList.remove('off');f.src=EXEC+VIEWS[v];}
-f.addEventListener('load',function(){setTimeout(function(){sp.classList.add('off');},400);});
+function make(v){
+  var f=document.createElement('iframe');f.title='레스큐라이프';f.setAttribute('allow','clipboard-write');
+  var o={el:f,ready:false,seen:0};F[v]=o;
+  f.addEventListener('load',function(){o.ready=true;if(CUR===v)setTimeout(function(){sp.classList.add('off');},250);});
+  f.src=EXEC+VIEWS[v];box.appendChild(f);return o;
+}
+function reload(v){var o=F[v];o.ready=false;o.el.src=EXEC+VIEWS[v]+(VIEWS[v]?'&':'?')+'_='+Date.now();}
+/* 화면 안쪽(앱스 스크립트가 감싼 프레임)까지 '데이터 새로 받기' 알림 */
+function refresh(v){var o=F[v];if(!o||!o.ready)return;(function bc(w,d){try{w.postMessage({rl:'refresh'},'*');}catch(e){}if(d<3)try{for(var i=0;i<w.frames.length;i++)bc(w.frames[i],d+1);}catch(e){}})(o.el.contentWindow,0);}
+function show(v,force){
+  var o=F[v],now=Date.now();
+  if(!o)o=make(v);
+  else if(force)reload(v);
+  else if(o.seen&&CUR!==v&&now-o.seen>FRESH)refresh(v);
+  if(CUR!==null&&F[CUR])F[CUR].seen=now;
+  for(var k in F)F[k].el.classList.toggle('on',k===v);
+  CUR=v;o.seen=now;
+  if(o.ready)sp.classList.add('off');else sp.classList.remove('off');
+}
 setTimeout(function(){sp.classList.add('off');},12000);
 window.addEventListener('message',function(e){
   var d=e.data;if(!d||d.rl!=='go'||typeof d.url!=='string'||d.url.indexOf(EXEC)!==0)return;
   var m=d.url.match(/view=(cal|stats|notice|contact|trans|equip)/), v=m?m[1]:'';
-  if(v===viewOf()){open(v);return;}
-  history.pushState(null,'',v?'#'+v:location.pathname);open(v);
+  if(v===viewOf()){refresh(v);return;} /* 지금 탭을 다시 누르면 데이터만 새로 받기 */
+  history.pushState(null,'',v?'#'+v:location.pathname);show(v);
 });
-window.addEventListener('popstate',function(){open(viewOf());});
+window.addEventListener('popstate',function(){show(viewOf());});
 function net(){document.getElementById('net').style.display=navigator.onLine?'none':'block';}
-window.addEventListener('online',function(){net();open(viewOf());});window.addEventListener('offline',net);net();
-open(viewOf());
+window.addEventListener('online',function(){net();show(viewOf(),true);});window.addEventListener('offline',net);net();
+/* 앱을 백그라운드에 두었다가 다시 열면 지금 화면 데이터를 새로 받음 */
+var hidAt=0;document.addEventListener('visibilitychange',function(){if(document.hidden)hidAt=Date.now();else if(hidAt&&Date.now()-hidAt>FRESH&&CUR!==null)refresh(CUR);});
+show(viewOf());
+/* 첫 화면이 뜬 뒤, 자주 쓰는 탭을 하나씩 뒤에서 미리 열어 둠 */
+var LAST=null;(function pre(){var o=F[CUR],l=LAST&&F[LAST];if(!o||!o.ready||(l&&!l.ready)){setTimeout(pre,700);return;}
+  var next=PRELOAD.filter(function(v){return !F[v];})[0];if(next===undefined)return;
+  setTimeout(function(){if(!F[next]){var n=make(next);n.seen=Date.now();LAST=next;}setTimeout(pre,700);},1200);})();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
 </script>
 </body>
